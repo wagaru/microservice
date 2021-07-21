@@ -15,13 +15,15 @@ import (
 type DigimonHandler struct {
 	DigimonUsecase domain.DigimonUsecase
 	DietUsecase    domain.DietUsecase
+	WeatherUsecase domain.WeatherUseCase
 	pb.UnimplementedDigimonServer
 }
 
-func NewDigimonHandler(s *grpc.Server, digimonUsecase domain.DigimonUsecase, dietUsecase domain.DietUsecase) {
+func NewDigimonHandler(s *grpc.Server, digimonUsecase domain.DigimonUsecase, dietUsecase domain.DietUsecase, weatherUsecase domain.WeatherUseCase) {
 	handler := &DigimonHandler{
 		DigimonUsecase: digimonUsecase,
 		DietUsecase:    dietUsecase,
+		WeatherUsecase: weatherUsecase,
 	}
 
 	pb.RegisterDigimonServer(s, handler)
@@ -42,17 +44,40 @@ func (d *DigimonHandler) Create(ctx context.Context, req *pb.CreateRequest) (*pb
 	}, nil
 }
 
-func (d *DigimonHandler) Query(ctx context.Context, req *pb.QueryRequest) (*pb.QueryResponse, error) {
-	anDigimon, err := d.DigimonUsecase.GetByID(ctx, req.GetId())
+func (d *DigimonHandler) QueryStream(req *pb.QueryRequest, srv pb.Digimon_QueryStreamServer) error {
+	weatherClient, err := d.WeatherUsecase.GetStreamByLocation(context.Background(), "A")
 	if err != nil {
 		logrus.Error(err)
-		return nil, status.Errorf(codes.Internal, "Internal error. Query digimon error")
+		return err
 	}
-	return &pb.QueryResponse{
-		Id:     anDigimon.ID,
-		Name:   anDigimon.Name,
-		Status: anDigimon.Status,
-	}, nil
+	for {
+		if err := weatherClient.Send(&domain.Weather{
+			Location: "A",
+		}); err != nil {
+			logrus.Error(err)
+			return err
+		}
+
+		aWeather, err := weatherClient.Recv()
+		if err != nil {
+			logrus.Error(err)
+			return err
+		}
+
+		anDigimon, err := d.DigimonUsecase.GetByID(context.Background(), req.GetId())
+		if err != nil {
+			logrus.Error(err)
+			return err
+		}
+		srv.Send(&pb.QueryResponse{
+			Id:       anDigimon.ID,
+			Name:     anDigimon.Name,
+			Status:   anDigimon.Status,
+			Location: aWeather.Location,
+			Weather:  aWeather.Weather,
+		})
+
+	}
 }
 
 func (d *DigimonHandler) Foster(ctx context.Context, req *pb.FosterRequest) (*pb.FosterResponse, error) {

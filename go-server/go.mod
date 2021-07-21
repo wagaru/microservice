@@ -11,6 +11,6 @@ require (
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.7.0
 	google.golang.org/grpc v1.38.0
-	google.golang.org/protobuf v1.26.0
+	google.golang.org/protobuf v1.26.1-0.20210525005349-febffdd88e85
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0
 )

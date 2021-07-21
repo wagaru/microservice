@@ -1,0 +1,20 @@
+syntax = "proto3";
+package weather;
+option go_package="/weather";
+
+service Weather {
+    rpc Query(stream QueryRequest) returns (stream QueryResponse) {}
+}
+
+message QueryRequest {
+    string location = 1;
+}
+
+message QueryResponse {
+    enum Weather {
+        SUNNY = 0;
+        CLOUDY = 1;
+    }
+    string location = 1;
+    Weather weather = 2;
+}

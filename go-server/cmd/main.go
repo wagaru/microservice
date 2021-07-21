@@ -16,7 +16,11 @@ import (
 	_digimonHandlerGRPCDelivery "go-server/digimon/delivery/grpc"
 	_digmonRepo "go-server/digimon/repository/postgresql"
 	_digimonUsecase "go-server/digimon/usecase"
+	_weatherRepo "go-server/weather/repository/microservice"
+	_weatherUsecase "go-server/weather/usecase"
 	"net"
+
+	weatherPB "go-server/gen/pb-go/weather"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -37,6 +41,7 @@ func main() {
 	logrus.Info("HTTP server started")
 
 	grpcPort := viper.GetString("GRPC_PORT")
+	grpcWeatherAddress := viper.GetString("GRPC_WEATHER_ADDRESS")
 	dbHost := viper.GetString("DB_HOST")
 	dbDatabase := viper.GetString("DB_DATABASE")
 	dbUser := viper.GetString("DB_USER")
@@ -53,9 +58,18 @@ func main() {
 		logrus.Fatal(err)
 	}
 
+	conn, err := grpc.Dial(grpcWeatherAddress, grpc.WithInsecure())
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	defer conn.Close()
+	weatherClient := weatherPB.NewWeatherClient(conn)
+
+	weatherRepo := _weatherRepo.NewWeatherRepo(weatherClient)
 	digimonRepo := _digmonRepo.NewpostgresqlDigimonRepository(db)
 	dietRepo := _dietRepo.NewPostgresqlDietRepository(db)
 
+	weatherUsecase := _weatherUsecase.NewWeatherUsecase(weatherRepo)
 	digimonUsecase := _digimonUsecase.NewDigimonUsecase(digimonRepo)
 	dietUsecase := _dietUsecase.NewDietUsecase(dietRepo)
 
@@ -65,6 +79,6 @@ func main() {
 	}
 
 	s := grpc.NewServer()
-	_digimonHandlerGRPCDelivery.NewDigimonHandler(s, digimonUsecase, dietUsecase)
+	_digimonHandlerGRPCDelivery.NewDigimonHandler(s, digimonUsecase, dietUsecase, weatherUsecase)
 	logrus.Fatal(s.Serve(lis))
 }

@@ -1,9 +1,9 @@
 syntax = "proto3";
-
+package gen;
 option go_package="/gen";
 
 service Digimon {
-    rpc Query (QueryRequest) returns (QueryResponse) {}
+    rpc QueryStream (QueryRequest) returns (stream QueryResponse) {}
     rpc Create (CreateRequest) returns (CreateResponse) {}
     rpc Foster (FosterRequest) returns (FosterResponse) {}
 }
@@ -34,6 +34,8 @@ message QueryResponse {
     string id = 1;
     string name = 2;
     string status = 3;
+    string location = 4;
+    string weather = 5;
 }
 
 message FosterResponse {

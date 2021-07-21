@@ -13,6 +13,15 @@ services:
             - db
         entrypoint: go run cmd/main.go
         restart: always
+    weather:
+        image: golang:1.14.6-alpine
+        working_dir: /server/weather
+        volumes:
+            - .:/server
+        ports:
+            - "6100:6100"
+        entrypoint: go run cmd/main.go
+        restart: always
     db:
         image: postgres:9.6.5-alpine
         ports: 
