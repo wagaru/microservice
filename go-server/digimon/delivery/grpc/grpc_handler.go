@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"go-server/domain"
+	"time"
 
 	pb "go-server/gen/pb-go/gen"
 
@@ -50,6 +51,7 @@ func (d *DigimonHandler) QueryStream(req *pb.QueryRequest, srv pb.Digimon_QueryS
 		logrus.Error(err)
 		return err
 	}
+
 	for {
 		if err := weatherClient.Send(&domain.Weather{
 			Location: "A",
@@ -57,6 +59,8 @@ func (d *DigimonHandler) QueryStream(req *pb.QueryRequest, srv pb.Digimon_QueryS
 			logrus.Error(err)
 			return err
 		}
+
+		time.Sleep(time.Duration(5) * time.Second)
 
 		aWeather, err := weatherClient.Recv()
 		if err != nil {
@@ -76,7 +80,6 @@ func (d *DigimonHandler) QueryStream(req *pb.QueryRequest, srv pb.Digimon_QueryS
 			Location: aWeather.Location,
 			Weather:  aWeather.Weather,
 		})
-
 	}
 }
 

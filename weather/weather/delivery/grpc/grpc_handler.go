@@ -40,6 +40,7 @@ func (w *WeatherHandler) Query(srv pb.Weather_QueryServer) error {
 	for {
 		req, err := srv.Recv()
 		if err == io.EOF {
+			logrus.Info("client send end stream...")
 			return nil
 		}
 		if err != nil {

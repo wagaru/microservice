@@ -38,7 +38,7 @@ func init() {
 }
 
 func main() {
-	logrus.Info("HTTP server started")
+	logrus.Info("Server HTTP server started")
 
 	grpcPort := viper.GetString("GRPC_PORT")
 	grpcWeatherAddress := viper.GetString("GRPC_WEATHER_ADDRESS")
@@ -58,7 +58,7 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	conn, err := grpc.Dial(grpcWeatherAddress, grpc.WithInsecure())
+	conn, err := grpc.Dial(grpcWeatherAddress, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		logrus.Fatal(err)
 	}

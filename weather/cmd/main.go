@@ -21,7 +21,7 @@ func init() {
 }
 
 func main() {
-	logrus.Info("HTTP server started")
+	logrus.Info("Weather HTTP server started")
 
 	grpcPort := viper.GetString("GRPC_PORT")
 

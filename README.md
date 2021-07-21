@@ -3,3 +3,7 @@
 # 遇到的問題
 
 1. 在 build protobuf 時範例是採用 namely/gen-grpc-gateway 這個 image，但我試都會失敗，就算指定版本也是。後來改用 namely/protoc-all，因為沒有要使用 gateway 功能所以應該是不影響
+
+# 需要注意的點
+
+1. 在 .env 裡要存取其他服務的IP位址時可以直接用 service name，例如 db, weather

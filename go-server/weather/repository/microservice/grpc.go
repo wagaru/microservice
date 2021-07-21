@@ -9,10 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	address = "localhost:123"
-)
-
 type WeatherRepo struct {
 	weatherGRPC pb.WeatherClient
 }
